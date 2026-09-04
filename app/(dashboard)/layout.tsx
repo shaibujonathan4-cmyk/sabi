@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { UserButton } from "@clerk/nextjs";
 
 export default async function DashboardLayout({
   children,
@@ -19,8 +20,6 @@ export default async function DashboardLayout({
     include: { businesses: true },
   });
 
-  // First time we're seeing this Clerk user in our DB — create them
-  // and check if they were pre-invited to any business by email
   if (!user) {
     const clerkUser = await currentUser();
     const email = clerkUser?.emailAddresses[0]?.emailAddress ?? "";
@@ -33,13 +32,11 @@ export default async function DashboardLayout({
       include: { businesses: true },
     });
 
-    // Claim any pending invites matching this email
     await prisma.businessUser.updateMany({
       where: { inviteEmail: email, userId: null },
       data: { userId: user.id, inviteEmail: null },
     });
 
-    // Reload to pick up any newly claimed businesses
     user = await prisma.user.findUnique({
       where: { clerkId },
       include: { businesses: true },
@@ -60,6 +57,13 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex flex-col min-h-screen">
+      <header className="flex justify-between items-center px-4 h-14 border-b sticky top-0 bg-black z-10">
+        <Link href="/dashboard" className="text-lg font-bold">
+          Sabi
+        </Link>
+        <UserButton />
+      </header>
+
       <main className="flex-1 pb-20">{children}</main>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around items-center h-16">
