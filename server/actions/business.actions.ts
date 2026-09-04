@@ -2,6 +2,7 @@
 
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentBusinessContext } from "@/lib/current-business";
 import { redirect } from "next/navigation";
 
 export async function createBusiness(formData: FormData) {
@@ -52,10 +53,22 @@ export async function createBusiness(formData: FormData) {
         role: "OWNER",
       },
     });
+
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+
+    await tx.subscription.create({
+      data: {
+        businessId: business.id,
+        status: "TRIALING",
+        trialEndsAt,
+      },
+    });
   });
 
   redirect("/dashboard");
 }
+
 export async function updateBusinessProfile(formData: FormData) {
   const { businessId, role } = await getCurrentBusinessContext();
 

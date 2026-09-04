@@ -47,6 +47,22 @@ export default async function DashboardLayout({
     redirect("/setup-business");
   }
 
+  const businessUser = user.businesses[0];
+  const subscription = await prisma.subscription.findUnique({
+    where: { businessId: businessUser.businessId },
+  });
+
+  if (subscription) {
+    const trialExpired =
+      subscription.status === "TRIALING" && new Date() >= subscription.trialEndsAt;
+    const blocked =
+      trialExpired || subscription.status === "EXPIRED" || subscription.status === "CANCELLED";
+
+    if (blocked) {
+      redirect("/upgrade");
+    }
+  }
+
   const navItems = [
     { href: "/dashboard", label: "Home", icon: "🏠" },
     { href: "/ledger", label: "Ledger", icon: "📒" },

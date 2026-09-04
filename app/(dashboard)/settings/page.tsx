@@ -3,7 +3,7 @@ import { updateBusinessProfile } from "@/server/actions/business.actions";
 import Link from "next/link";
 
 export default async function SettingsPage() {
-  const { business, role } = await getCurrentBusinessContext();
+  const { business, role, subscription } = await getCurrentBusinessContext();
 
   return (
     <div className="p-6 pb-24 space-y-8">
@@ -80,13 +80,40 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      <section>
+<section>
         <h2 className="font-medium mb-3">Subscription</h2>
         <div className="border rounded-lg p-4">
-          <p className="font-medium">Free Plan</p>
-          <p className="text-sm text-gray-500">
-            You&apos;re currently on the free tier. Paid plans coming soon.
-          </p>
+          {subscription?.status === "ACTIVE" ? (
+            <>
+              <p className="font-medium text-green-600">Active — Sabi Pro</p>
+              <p className="text-sm text-gray-500">
+                Renews on{" "}
+                {subscription.currentPeriodEnd
+                  ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+                  : "—"}
+              </p>
+            </>
+          ) : subscription?.status === "TRIALING" ? (
+            <>
+              <p className="font-medium">Free Trial</p>
+              <p className="text-sm text-gray-500">
+                Trial ends on {new Date(subscription.trialEndsAt).toLocaleDateString()}
+              </p>
+              <Link href="/upgrade" className="btn-secondary inline-block mt-3">
+                Upgrade Now
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="font-medium text-red-600">Inactive</p>
+              <p className="text-sm text-gray-500">
+                Your subscription has ended.
+              </p>
+              <Link href="/upgrade" className="btn-secondary inline-block mt-3">
+                Reactivate
+              </Link>
+            </>
+          )}
         </div>
       </section>
     </div>

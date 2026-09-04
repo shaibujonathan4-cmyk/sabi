@@ -52,10 +52,10 @@ model Business {
   users         BusinessUser[]
   categories    Category[]
   ledgerEntries LedgerEntry[]
+  subscription  Subscription?
 
   @@map("businesses")
 }
-
 model BusinessUser {
   id         String   @id @default(cuid())
   role       Role     @default(STAFF)
@@ -122,4 +122,26 @@ model DebtPayment {
   ledgerEntry   LedgerEntry @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
 
   @@map("debt_payments")
+}
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  businessId        String             @unique
+  status            SubscriptionStatus @default(TRIALING)
+  trialEndsAt       DateTime
+  currentPeriodEnd  DateTime?
+  paystackCustomerCode String?
+  paystackSubscriptionCode String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }

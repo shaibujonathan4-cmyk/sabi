@@ -12,7 +12,11 @@ export async function getCurrentBusinessContext() {
     where: { clerkId },
     include: {
       businesses: {
-        include: { business: true },
+        include: {
+          business: {
+            include: { subscription: true },
+          },
+        },
       },
     },
   });
@@ -21,13 +25,26 @@ export async function getCurrentBusinessContext() {
     redirect("/setup-business");
   }
 
-  // MVP assumption: one business per user for now
   const businessUser = user.businesses[0];
+  const subscription = businessUser.business.subscription;
+
+  let isAccessAllowed = true;
+  if (subscription) {
+    if (subscription.status === "TRIALING") {
+      isAccessAllowed = new Date() < subscription.trialEndsAt;
+    } else if (subscription.status === "ACTIVE") {
+      isAccessAllowed = true;
+    } else {
+      isAccessAllowed = false;
+    }
+  }
 
   return {
     userId: user.id,
     businessId: businessUser.businessId,
     business: businessUser.business,
     role: businessUser.role,
+    subscription,
+    isAccessAllowed,
   };
 }
