@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@layer components {
+  .btn-primary {
+    @apply bg-black text-white rounded-md px-4 py-2 font-medium
+           transition-transform duration-150 ease-out
+           active:scale-95 active:opacity-80
+           hover:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply border rounded-md px-4 py-2 font-medium
+           transition-transform duration-150 ease-out
+           active:scale-95 active:opacity-70
+           hover:bg-gray-100;
+  }
+}

@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum LedgerEntryType {
+  INCOME
+  EXPENSE
+  CUSTOMER_DEBT
+  SUPPLIER_DEBT
+}
+
+enum DebtStatus {
+  OPEN
+  PARTIALLY_SETTLED
+  SETTLED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  clerkId       String         @unique
+  email         String         @unique
+  fullName      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  businesses    BusinessUser[]
+  ledgerEntries LedgerEntry[]  @relation("CreatedBy")
+
+  @@map("users")
+}
+
+model Business {
+  id            String         @id @default(cuid())
+  name          String
+  type          String
+  currency      String         @default("NGN")
+  logoUrl       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  users         BusinessUser[]
+  categories    Category[]
+  ledgerEntries LedgerEntry[]
+
+  @@map("businesses")
+}
+
+model BusinessUser {
+  id         String   @id @default(cuid())
+  role       Role     @default(STAFF)
+  userId     String?
+  inviteEmail String?
+  businessId String
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+  @@map("business_users")
+}
+model Category {
+  id         String          @id @default(cuid())
+  name       String
+  type       LedgerEntryType
+  businessId String
+  createdAt  DateTime        @default(now())
+
+  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  ledgerEntries LedgerEntry[]
+
+  @@unique([businessId, name, type])
+  @@map("categories")
+}
+
+model LedgerEntry {
+  id          String          @id @default(cuid())
+  type        LedgerEntryType
+  amount      Decimal         @db.Decimal(14, 2)
+  description String
+  date        DateTime
+  personName  String?
+  isDeleted   Boolean         @default(false)
+
+  debtStatus    DebtStatus?
+  settledAmount Decimal?      @db.Decimal(14, 2) @default(0)
+
+  businessId  String
+  categoryId  String?
+  createdById String
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  business     Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category     Category?      @relation(fields: [categoryId], references: [id])
+  createdBy    User           @relation("CreatedBy", fields: [createdById], references: [id])
+  debtPayments DebtPayment[]
+
+  @@index([businessId, date])
+  @@index([businessId, type])
+  @@map("ledger_entries")
+}
+
+model DebtPayment {
+  id            String      @id @default(cuid())
+  amount        Decimal     @db.Decimal(14, 2)
+  date          DateTime    @default(now())
+  ledgerEntryId String
+
+  ledgerEntry   LedgerEntry @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
+
+  @@map("debt_payments")
+}

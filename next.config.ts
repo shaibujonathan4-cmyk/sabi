@@ -1,7 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    turbopackTree: true, // optional
+  },
+  // Set root directory scope
+  turbopack: {
+    root: '/home',
+  },
 };
 
 export default nextConfig;
