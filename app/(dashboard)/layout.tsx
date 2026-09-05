@@ -27,10 +27,25 @@ export default async function DashboardLayout({
       `${clerkUser?.firstName ?? ""} ${clerkUser?.lastName ?? ""}`.trim() ||
       "User";
 
-    user = await prisma.user.create({
-      data: { clerkId, email, fullName },
-      include: { businesses: true },
+    // Check if a user with this email already exists (e.g. from a
+    // previous Clerk instance) and re-link it to the new clerkId
+    // instead of creating a duplicate.
+    const existingByEmail = await prisma.user.findUnique({
+      where: { email },
     });
+
+    if (existingByEmail) {
+      user = await prisma.user.update({
+        where: { id: existingByEmail.id },
+        data: { clerkId },
+        include: { businesses: true },
+      });
+    } else {
+      user = await prisma.user.create({
+        data: { clerkId, email, fullName },
+        include: { businesses: true },
+      });
+    }
 
     await prisma.businessUser.updateMany({
       where: { inviteEmail: email, userId: null },
