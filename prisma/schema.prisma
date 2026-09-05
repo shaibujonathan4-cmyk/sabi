@@ -39,7 +39,15 @@ model User {
 
   @@map("users")
 }
+model Feedback {
+  id         String   @id @default(cuid())
+  message    String
+  email      String?
+  businessId String?
+  createdAt  DateTime @default(now())
 
+  @@map("feedback")
+}
 model Business {
   id            String         @id @default(cuid())
   name          String

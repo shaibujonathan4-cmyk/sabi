@@ -1,4 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import FeedbackButton from "@/components/feedback/FeedbackButton";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -96,7 +97,7 @@ export default async function DashboardLayout({
       </header>
 
       <main className="flex-1 pb-20">{children}</main>
-
+      <FeedbackButton />
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-gray-800 flex justify-around items-center h-16">
         {navItems.map((item) => (
           <Link
