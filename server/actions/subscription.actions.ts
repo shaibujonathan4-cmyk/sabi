@@ -5,7 +5,7 @@ import { getCurrentBusinessContext } from "@/lib/current-business";
 import { redirect } from "next/navigation";
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!;
-const PLAN_AMOUNT_KOBO = 500000; // NGN 5,000 (Paystack uses kobo, so x100)
+const PLAN_AMOUNT_KOBO = 200000; // NGN 5,000 (Paystack uses kobo, so x100)
 
 export async function initializePayment() {
   const { businessId } = await getCurrentBusinessContext();

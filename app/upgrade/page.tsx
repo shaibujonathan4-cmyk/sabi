@@ -15,7 +15,7 @@ export default async function UpgradePage() {
       </p>
 
       <div className="border rounded-lg p-6 mb-6">
-        <p className="text-3xl font-bold">NGN 5,000</p>
+        <p className="text-3xl font-bold">NGN 2,000</p>
         <p className="text-gray-500 text-sm">per month</p>
       </div>
 
